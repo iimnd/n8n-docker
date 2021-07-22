@@ -1,0 +1,57 @@
+version: "3.7"
+
+volumes:
+    n8n-db-postgres:
+
+networks:
+    n8n_net:
+        driver: bridge
+
+services:
+  app:
+    image: n8nio/n8n:latest
+    container_name: "n8n_app"
+    volumes:
+      - ./dot-n8n:/home/sepulsa/.n8n
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=false
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=c0b4d1b4c4
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=db
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=n8n_db2
+      - DB_POSTGRESDB_USER=root
+      - DB_POSTGRESDB_PASSWORD=c0b4d1b4c4
+    networks:
+      - n8n_net
+    ports:
+      - 5678:5678
+    depends_on:
+     - db
+    restart: unless-stopped
+  db:
+    image: postgres:11
+    container_name: "n8n_db"
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=c0b4d1b4c4
+      - POSTGRES_DB=n8n_db2
+      - POSTGRES_NON_ROOT_USER=admin
+      - POSTGRES_NON_ROOT_PASSWORD=Rahasia88oke#
+      - PGDATA= /var/lib/postgresql/data/pgdata
+    volumes:
+      - n8n-db-postgres:/var/lib/postgresql/data/pgdata
+    networks:
+      - n8n_net
+    restart: unless-stopped
+  
+  adminer:
+    image: adminer:4.8.1
+    restart: always
+    depends_on: 
+      - db
+    networks:
+      - n8n_net
+    ports:
+      - 8080:8080
